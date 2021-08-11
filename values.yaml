@@ -1,0 +1,14 @@
+loadtest:
+  name: my-loadtest
+  locust_locustfile_configmap: my-loadtest-locustfile
+  locust_locustfile: locustfile.py
+  pip_packages:
+    - locust-plugins
+
+  mount_external_secret:
+    mountPath: uacs
+    files:
+      uacs: [uacs.csv]
+
+worker:
+  replicas: 6

@@ -2,3 +2,6 @@ uacs.csv
 dev.json
 nik13.json
 _pycache_/
+.terraform
+.terraform*
+*.tfstate*
