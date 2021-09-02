@@ -11,7 +11,7 @@ kubectl create secret generic uacs --from-file uacs.csv ||
   kubectl create secret generic uacs --from-file uacs.csv -o yaml --dry-run | kubectl replace -f -
 
 helm repo add deliveryhero https://charts.deliveryhero.io/ || true
-helm uninstall locust
+helm uninstall locust || true
 helm install locust deliveryhero/locust -f values.yaml --wait
 
 kubectl --namespace default port-forward service/locust 8089:8089
