@@ -55,10 +55,11 @@ Run docker compose
 
 ```sh
 export GOOGLE_OAUTH_ACCESS_TOKEN=$(gcloud auth print-access-token)
+gcloud config set project <gcp_project_id>
 terraform -chdir=terraform init
 terraform -chdir=terraform apply --var=project_id="<gcp_project_id>"
 
-./k8s-lucust.sh
+./k8s-locust.sh
 ```
 
 #### Cleanup
