@@ -54,7 +54,7 @@ Run docker compose
 **Note**: This stores terraform state locally in a `terraform.tfstate`. Look after this carefully, so you can easily update/ teardown.
 
 ```sh
-terraform apply terraform
+terraform -chdir terraform apply --var=project_id="<gcp_project_id>"
 
 ./k8s-lucust.sh
 ```
@@ -64,5 +64,5 @@ terraform apply terraform
 Running a kubernetes cluster gets expensive, tear it down when you are finished.
 
 ```sh
-terraform destroy terraform
+terraform -chdir terraform destroy
 ```
