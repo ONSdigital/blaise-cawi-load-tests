@@ -4,6 +4,7 @@ loadtest:
   locust_locustfile: locustfile.py
   pip_packages:
     - locust-plugins
+    - python-dotenv
 
   mount_external_secret:
     mountPath: uacs

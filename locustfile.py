@@ -1,17 +1,24 @@
-from os import times
+import os
+
+from dotenv import load_dotenv
 from locust import HttpUser, task, constant
 from locust_plugins.csvreader import CSVDictReader
-from locust.contrib.fasthttp import FastHttpUser
-import time
 
-uac_reader = CSVDictReader("/uacs/uacs.csv")
+load_dotenv()
 
-instrument_id = "1336fd28-22f0-421e-ab0f-cd7b050e8ccf"
-instrument_name = "dst2108w"
+instrument_name = os.getenv("INSTRUMENT_NAME")
+instrument_guid = os.getenv("INSTRUMENT_GUID")
+host_url = os.getenv("HOST_URL")
+server_park = os.getenv("SERVER_PARK", "gusty")
+
+if os.path.isfile("/uacs/uacs.csv"):
+    uac_reader = CSVDictReader("/uacs/uacs.csv")
+else:
+    uac_reader = CSVDictReader("uacs.csv")
 
 
-class CAWI(FastHttpUser):
-    host = "https://dev-cawi.social-surveys.gcp.onsdigital.uk"
+class CAWI(HttpUser):
+    host = f"{host_url}"
     wait_time = constant(0)
 
     @task
@@ -20,19 +27,24 @@ class CAWI(FastHttpUser):
         print(uac["uaccode"])
         print(uac["postcode"])
         print(uac["caseid"])
+
+        """
+        # cawi portal
         self.client.get("/auth/login")
         time.sleep(3)
         self.client.post("/auth/login", {"uac": uac["uaccode"]})
         self.client.get("/auth/login/postcode")
         time.sleep(2)
         self.client.post("/auth/login/postcode", {"postcode": uac["postcode"]})
+        """
+
         self.client.get(f"/{instrument_name}/")
         self.client.post(
             f"/{instrument_name}/api/application/start_interview",
             json={
                 "RuntimeParameters": {
-                    "ServerPark": "gusty",
-                    "InstrumentId": f"{instrument_id}",
+                    "ServerPark": f"{server_park}",
+                    "InstrumentId": f"{instrument_guid}",
                     "MeasurePageTimes": False,
                     "IsPreview": False,
                     "IsTesting": False,
@@ -63,5 +75,9 @@ class CAWI(FastHttpUser):
                 "RefreshToken": None,
             },
         )
+
+        """
+        # cawi portal
         time.sleep(5)
         self.client.get("/auth/logout")
+        """

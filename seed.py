@@ -1,14 +1,21 @@
+import csv
 import os
+import sys
+
 import requests
+from dotenv import load_dotenv
 from google.auth.transport.requests import Request
 from google.oauth2 import id_token
-import csv
+
+load_dotenv()
 
 instrument_name = os.getenv("INSTRUMENT_NAME")
 bus_client_id = os.getenv("BUS_CLIENT_ID")
 bus_url = os.getenv("BUS_URL")
-restapi_url = os.getenv("RESTAPI_URL", "http://localhost:90")
-serverpark = os.getenv("SERVERPARK", "gusty")
+rest_api_url = os.getenv("REST_API_URL", "http://localhost:90")
+server_park = os.getenv("SERVER_PARK", "gusty")
+
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.split(os.path.abspath(os.path.realpath(sys.argv[0])))[0] + "\key.json"
 
 
 def generate_uacs(bus_url, bus_client_id, instrument_name):
@@ -19,13 +26,13 @@ def generate_uacs(bus_url, bus_client_id, instrument_name):
     ).json()
 
 
-def get_postcodes(restapi_url, serverpark, instrument_name):
+def get_postcodes(rest_api_url, server_park, instrument_name):
     return (
         requests.get(
-            f"{restapi_url}/api/v1/serverparks/{serverpark}/instruments/{instrument_name}/report?fieldIds=qid.serial_number&fieldIds=qdatabag.postcode"
+            f"{rest_api_url}/api/v1/serverparks/{server_park}/instruments/{instrument_name}/report?fieldIds=qid.serial_number&fieldIds=qdatabag.postcode"
         )
-        .json()
-        .get("reportingData")
+            .json()
+            .get("reportingData")
     )
 
 
@@ -37,7 +44,7 @@ def match_postcode(postcodes, case_id):
 
 
 uacs = generate_uacs(bus_url, bus_client_id, instrument_name)
-postcodes = get_postcodes(restapi_url, serverpark, instrument_name)
+postcodes = get_postcodes(rest_api_url, server_park, instrument_name)
 
 with open("uacs.csv", "w", newline="") as csvfile:
     fieldnames = ["uaccode", "postcode", "caseid"]

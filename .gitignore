@@ -1,6 +1,6 @@
-uacs.csv
-dev.json
-nik13.json
+.env
+*.json
+*.csv
 _pycache_/
 .terraform
 .terraform*
