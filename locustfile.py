@@ -6,15 +6,15 @@ from locust_plugins.csvreader import CSVDictReader
 
 load_dotenv()
 
-instrument_name = os.getenv("INSTRUMENT_NAME")
-instrument_guid = os.getenv("INSTRUMENT_GUID")
-host_url = os.getenv("HOST_URL")
+instrument_name = os.getenv("INSTRUMENT_NAME", "dst2106a")
+instrument_guid = os.getenv("INSTRUMENT_GUID", "da6db4df-f429-4685-b861-e5c9d0f94c70")
+host_url = os.getenv("HOST_URL", "https://dev-nik13-cati.social-surveys.gcp.onsdigital.uk")
 server_park = os.getenv("SERVER_PARK", "gusty")
 
-if os.path.isfile("/uacs/uacs.csv"):
-    uac_reader = CSVDictReader("/uacs/uacs.csv")
+if os.path.isfile("/seed-data/seed-data.csv"):
+    seed_data_reader = CSVDictReader("/seed-data/seed-data.csv")
 else:
-    uac_reader = CSVDictReader("uacs.csv")
+    seed_data_reader = CSVDictReader("seed-data.csv")
 
 
 class CAWI(HttpUser):
@@ -23,19 +23,19 @@ class CAWI(HttpUser):
 
     @task
     def open_questionnaire(self):
-        uac = next(uac_reader)
-        print(uac["uaccode"])
-        print(uac["postcode"])
-        print(uac["caseid"])
+        seed_data = next(seed_data_reader)
+        print(seed_data["uac"])
+        print(seed_data["postcode"])
+        print(seed_data["case_id"])
 
         """
         # cawi portal
         self.client.get("/auth/login")
         time.sleep(3)
-        self.client.post("/auth/login", {"uac": uac["uaccode"]})
+        self.client.post("/auth/login", {"uac": seed_data["uac"]})
         self.client.get("/auth/login/postcode")
         time.sleep(2)
-        self.client.post("/auth/login/postcode", {"postcode": uac["postcode"]})
+        self.client.post("/auth/login/postcode", {"postcode": seed_data["postcode"]})
         """
 
         self.client.get(f"/{instrument_name}/")
@@ -48,7 +48,7 @@ class CAWI(HttpUser):
                     "MeasurePageTimes": False,
                     "IsPreview": False,
                     "IsTesting": False,
-                    "KeyValue": uac["caseid"],
+                    "KeyValue": seed_data["case_id"],
                     "LayoutSet": "CAWI-Web_Large",
                     "Mode": "CAWI",
                 },

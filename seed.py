@@ -37,24 +37,24 @@ def get_postcodes(rest_api_url, server_park, instrument_name):
 
 
 def match_postcode(postcodes, case_id):
-    for postcode_thing in postcodes:
-        if postcode_thing.get("qid.serial_number") == case_id:
-            return postcode_thing.get("qdatabag.postcode")
+    for postcode in postcodes:
+        if postcode.get("qid.serial_number") == case_id:
+            return postcode.get("qdatabag.postcode")
     return ""
 
 
 uacs = generate_uacs(bus_url, bus_client_id, instrument_name)
 postcodes = get_postcodes(rest_api_url, server_park, instrument_name)
 
-with open("uacs.csv", "w", newline="") as csvfile:
-    fieldnames = ["uaccode", "postcode", "caseid"]
-    csvwriter = csv.DictWriter(csvfile, fieldnames=fieldnames)
-    csvwriter.writeheader()
+with open("seed_data.csv", "w", newline="") as seed_data_csv:
+    seed_data_fieldnames = ["uac", "postcode", "case_id"]
+    csv_writer = csv.DictWriter(seed_data_csv, fieldnames=seed_data_fieldnames)
+    csv_writer.writeheader()
     for uac, uac_info in uacs.items():
-        csvwriter.writerow(
+        csv_writer.writerow(
             {
-                "uaccode": uac,
-                "caseid": uac_info.get("case_id"),
+                "uac": uac,
+                "case_id": uac_info.get("case_id"),
                 "postcode": match_postcode(postcodes, uac_info.get("case_id")),
             }
         )

@@ -54,11 +54,19 @@ Create an .env file in the root of the project and add the following environment
 
 | Variable | Description | Example |
 | --- | --- | --- |
-| INSTRUMENT_NAME | | |
-| INSTRUMENT_GUID | | |
-| BUS_CLIENT_ID | | |
-| BUS_URL | | |
-| HOST_URL | | |
+| INSTRUMENT_NAME | The name of the questionnaire instrument. | dst2106a |
+| INSTRUMENT_GUID | The globally unique identifier of the questionnaire instrument. | da6db4df-f429-4685-b861-e5c9d0f94c70 |
+| BUS_CLIENT_ID | The bearer token to authenticate with BUS. | blah.apps.googleusercontent.com |
+| BUS_URL | The URL for BUS. | https://dev-sandbox123-bus.social-surveys.gcp.onsdigital.uk |
+| HOST_URL | The URL for Locust to run load tests on. | https://dev-sandbox123-cati.social-surveys.gcp.onsdigital.uk https://dev-sandbox123-cawi.social-surveys.gcp.onsdigital.uk |
+
+```shell
+INSTRUMENT_NAME="dst2106a"
+INSTRUMENT_GUID="da6db4df-f429-4685-b861-e5c9d0f94c70"
+BUS_CLIENT_ID="blah.apps.googleusercontent.com"
+BUS_URL="https://dev-sandbox123-bus.social-surveys.gcp.onsdigital.uk"
+HOST_URL="https://dev-sandbox123-cati.social-surveys.gcp.onsdigital.uk"
+```
 
 Seed data and download to csv file:
 
@@ -132,5 +140,5 @@ http://localhost:8089/
 Teardown cluster:
 
 ```shell
-terraform -chdir=terraform destroy
+terraform -chdir=terraform destroy --var=project_id=ons-blaise-v2-dev-sandbox123
 ```

@@ -7,9 +7,9 @@ loadtest:
     - python-dotenv
 
   mount_external_secret:
-    mountPath: uacs
+    mountPath: seed-data
     files:
-      uacs: [uacs.csv]
+      seed-data: [seed-data.csv]
 
 worker:
   replicas: 6

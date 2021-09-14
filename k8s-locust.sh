@@ -7,8 +7,8 @@ gcloud container clusters get-credentials locust-gke-cluster --region=europe-wes
 kubectl create configmap my-loadtest-locustfile --from-file locustfile.py ||
   kubectl create configmap my-loadtest-locustfile --from-file locustfile.py -o yaml --dry-run | kubectl replace -f -
 
-kubectl create secret generic uacs --from-file uacs.csv ||
-  kubectl create secret generic uacs --from-file uacs.csv -o yaml --dry-run | kubectl replace -f -
+kubectl create secret generic seed-data --from-file seed-data.csv ||
+  kubectl create secret generic seed-data --from-file seed-data.csv -o yaml --dry-run | kubectl replace -f -
 
 helm repo add deliveryhero https://charts.deliveryhero.io/ || true
 helm uninstall locust || true
