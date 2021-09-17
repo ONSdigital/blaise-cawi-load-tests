@@ -1,7 +1,8 @@
 .env
 *.json
+*.xml
 *.csv
-_pycache_/
+__pycache__/
 .terraform
 .terraform*
 *.tfstate*

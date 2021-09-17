@@ -1,17 +1,16 @@
 import csv
 import os
-import sys
-
 import requests
+import sys
 from dotenv import load_dotenv
 from google.auth.transport.requests import Request
 from google.oauth2 import id_token
 
 load_dotenv()
 
-instrument_name = os.getenv("INSTRUMENT_NAME")
-bus_client_id = os.getenv("BUS_CLIENT_ID")
-bus_url = os.getenv("BUS_URL")
+instrument_name = os.getenv("INSTRUMENT_NAME", "ENV_VAR_NOT_SET")
+bus_client_id = os.getenv("BUS_CLIENT_ID", "ENV_VAR_NOT_SET")
+bus_url = os.getenv("BUS_URL", "ENV_VAR_NOT_SET")
 rest_api_url = os.getenv("REST_API_URL", "http://localhost:90")
 server_park = os.getenv("SERVER_PARK", "gusty")
 
@@ -46,7 +45,7 @@ def match_postcode(postcodes, case_id):
 uacs = generate_uacs(bus_url, bus_client_id, instrument_name)
 postcodes = get_postcodes(rest_api_url, server_park, instrument_name)
 
-with open("seed_data.csv", "w", newline="") as seed_data_csv:
+with open("seed-data.csv", "w", newline="") as seed_data_csv:
     seed_data_fieldnames = ["uac", "postcode", "case_id"]
     csv_writer = csv.DictWriter(seed_data_csv, fieldnames=seed_data_fieldnames)
     csv_writer.writeheader()

@@ -7,7 +7,6 @@ Prerequisites:
 - gcloud
 
 Clone the project locally:
-
 ```shell
 git clone https://github.com/ONSdigital/ ...
 ```
@@ -25,7 +24,6 @@ Windows:
 ```
 
 Install dependencies:
-
 ```shell
 poetry install
 ```
@@ -69,13 +67,11 @@ HOST_URL="https://dev-sandbox123-cati.social-surveys.gcp.onsdigital.uk"
 ```
 
 Seed data and download to csv file:
-
 ```shell
 poetry run python seed.py
 ```
 
 Start Locust:
-
 ```shell
 poetry run python -m locust
 ```
@@ -90,13 +86,11 @@ Prerequisites:
 - Docker
 
 Build docker image:
-
 ```shell
 docker build -t mylocust .
 ```
 
 Run docker compose:
-
 ```shell
 docker-compose up --scale worker=4
 ```

@@ -1,32 +1,44 @@
 import os
-
+import random
+import time
 from dotenv import load_dotenv
-from locust import HttpUser, task, constant
+from locust import HttpUser, task, constant, between
 from locust_plugins.csvreader import CSVDictReader
 
 load_dotenv()
 
-instrument_name = os.getenv("INSTRUMENT_NAME", "dst2106a")
-instrument_guid = os.getenv("INSTRUMENT_GUID", "da6db4df-f429-4685-b861-e5c9d0f94c70")
-host_url = os.getenv("HOST_URL", "https://dev-nik13-cati.social-surveys.gcp.onsdigital.uk")
+# instrument_name = os.getenv("INSTRUMENT_NAME", "dst2106a")
+# instrument_guid = os.getenv("INSTRUMENT_GUID", "da6db4df-f429-4685-b861-e5c9d0f94c70")
+# instrument_name = os.getenv("INSTRUMENT_NAME", "dst2108w")
+# instrument_guid = os.getenv("INSTRUMENT_GUID", "1336fd28-22f0-421e-ab0f-cd7b050e8ccf")
+instrument_name = os.getenv("INSTRUMENT_NAME", "ENV_VAR_NOT_SET")
+instrument_guid = os.getenv("INSTRUMENT_GUID", "ENV_VAR_NOT_SET")
+host_url = os.getenv("HOST_URL", "ENV_VAR_NOT_SET")
 server_park = os.getenv("SERVER_PARK", "gusty")
 
 if os.path.isfile("/seed-data/seed-data.csv"):
     seed_data_reader = CSVDictReader("/seed-data/seed-data.csv")
+elif os.path.isfile("/mnt/locust/seed-data.csv"):
+    seed_data_reader = CSVDictReader("/mnt/locust/seed-data.csv")
 else:
     seed_data_reader = CSVDictReader("seed-data.csv")
 
 
 class CAWI(HttpUser):
     host = f"{host_url}"
-    wait_time = constant(0)
+
+    # wait_time = constant(1) # fixed wait time
+    # wait_time = between(1, 3) # random wait time range
 
     @task
     def open_questionnaire(self):
+        print("user running open questionnaire task")
         seed_data = next(seed_data_reader)
-        print(seed_data["uac"])
-        print(seed_data["postcode"])
-        print(seed_data["case_id"])
+        print("uac: " + seed_data["uac"])
+        print("postcode: " + seed_data["postcode"])
+        print("case_id: " + seed_data["case_id"])
+
+        # time.sleep(random.randint(100, 300) / 100)
 
         """
         # cawi portal
@@ -49,6 +61,7 @@ class CAWI(HttpUser):
                     "IsPreview": False,
                     "IsTesting": False,
                     "KeyValue": seed_data["case_id"],
+                    # "KeyValue": "1001011",
                     "LayoutSet": "CAWI-Web_Large",
                     "Mode": "CAWI",
                 },
