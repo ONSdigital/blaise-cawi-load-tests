@@ -35,12 +35,11 @@ def generate_uacs(bus_url, bus_client_id, instrument_name):
 def get_postcodes(rest_api_url, server_park, instrument_name):
     return (
         requests.get(
-            f"{rest_api_url}/api/v1/serverparks/{server_park}/instruments/{instrument_name}/report?fieldIds=qid.serial_number&fieldIds=qdatabag.postcode"
+            f"{rest_api_url}/api/v1/serverparks/{server_park}/instruments/{instrument_name}/report?fieldIds=qid.serial_number"
         )
             .json()
             .get("reportingData")
     )
-
 
 def match_postcode(postcodes, case_id):
     for postcode in postcodes:
@@ -51,16 +50,14 @@ def match_postcode(postcodes, case_id):
 uacs = []
 
 for instrument_name in instrument_names:
-    #delete_uacs(bus_url, bus_client_id, instrument_name)
+    delete_uacs(bus_url, bus_client_id, instrument_name)
     instrument_uacs = generate_uacs(bus_url, bus_client_id, instrument_name)
     instrument_details = get_instrument_details(rest_api_url, server_park, instrument_name)
-    instrument_postcodes = instrument_details.get("reportingData")
 
     for uac, uac_info in instrument_uacs.items():
         uacs.append({
             "uac": uac,
             "case_id": uac_info.get("case_id"),
-            "postcode": match_postcode(instrument_postcodes, uac_info.get("case_id")),
             "instrument_name": instrument_name,
             "instrument_id": instrument_details.get("instrumentId")
         })
@@ -68,7 +65,7 @@ for instrument_name in instrument_names:
 sorted_uacs = sorted(uacs, key=lambda k: k["uac"])
 
 with open("seed-data.csv", "w", newline="") as seed_data_csv:
-    seed_data_fieldnames = ["uac", "case_id", "postcode", "instrument_name", "instrument_id"]
+    seed_data_fieldnames = ["uac", "case_id", "instrument_name", "instrument_id"]
     csv_writer = csv.DictWriter(seed_data_csv, fieldnames=seed_data_fieldnames)
     csv_writer.writeheader()
     for uac_detail in sorted_uacs:

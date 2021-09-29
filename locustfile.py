@@ -1,10 +1,9 @@
 import os
-import random
 import time
 import csv
 from datetime import datetime
 from dotenv import load_dotenv
-from locust import HttpUser, task, constant, between, events
+from locust import HttpUser, task, constant, events
 from locust.runners import MasterRunner, WorkerRunner, LocalRunner
 
 load_dotenv()
@@ -72,10 +71,7 @@ def on_test_start(environment, **_kwargs):
 
 class CAWI(HttpUser):
     host = f"{host_url}"
-    #Consistant wait
     wait_time = constant(2)
-    #Random Wait
-    #wait_time = between(1,3)
 
     def next(self):
         global seed_index
@@ -96,6 +92,11 @@ class CAWI(HttpUser):
         print(datetime.now())
 
         self.next()
+
+        # cawi portal
+        self.client.get("/auth/login")
+        time.sleep(3)
+        self.client.post("/auth/login", {"uac": seeded_case["uac"]})
 
         self.client.get(f"/{seeded_case['instrument_name']}/")
         self.client.post(
@@ -124,7 +125,7 @@ class CAWI(HttpUser):
                     "Platform": 1,
                     "RecorderAvailable": False,
                     "Referrer": "",
-                    "ReferrerUrl": f"https://{self.host}/auth/login/postcode",
+                    "ReferrerUrl": f"https://{self.host}/auth/login",
                     "ScreenHeight": 790,
                     "ScreenWidth": 1720,
                     "ScrollbarSize": 15,
@@ -136,3 +137,6 @@ class CAWI(HttpUser):
             },
         )
 
+        # cawi portal
+        time.sleep(5)
+        self.client.get("/auth/logout")
