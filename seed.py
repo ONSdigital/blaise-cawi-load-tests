@@ -7,8 +7,12 @@ from google.auth.transport.requests import Request
 from google.oauth2 import id_token
 
 load_dotenv()
+instrument_name = {
+    "instrument_name": ["DST2101A", "OPN2101A"],
+    "instrument_id": ["1", "2"]
+}
 
-instrument_name = os.getenv("INSTRUMENT_NAME", "ENV_VAR_NOT_SET")
+#instrument_name = os.getenv("INSTRUMENT_NAME", "ENV_VAR_NOT_SET")
 bus_client_id = os.getenv("BUS_CLIENT_ID", "ENV_VAR_NOT_SET")
 bus_url = os.getenv("BUS_URL", "ENV_VAR_NOT_SET")
 rest_api_url = os.getenv("REST_API_URL", "http://localhost:90")
@@ -52,15 +56,20 @@ delete_uacs(bus_url, bus_client_id, instrument_name)
 uacs = generate_uacs(bus_url, bus_client_id, instrument_name)
 postcodes = get_postcodes(rest_api_url, server_park, instrument_name)
 
+
 with open("seed-data.csv", "w", newline="") as seed_data_csv:
-    seed_data_fieldnames = ["uac", "postcode", "case_id"]
-    csv_writer = csv.DictWriter(seed_data_csv, fieldnames=seed_data_fieldnames)
-    csv_writer.writeheader()
-    for uac, uac_info in uacs.items():
-        csv_writer.writerow(
-            {
-                "uac": uac,
-                "case_id": uac_info.get("case_id"),
-                "postcode": match_postcode(postcodes, uac_info.get("case_id")),
-            }
-        )
+    for instrument_name, instrument_id in instrument_name.items():
+
+        seed_data_fieldnames = ["uac", "postcode", "case_id"]
+        csv_writer = csv.DictWriter(seed_data_csv, fieldnames=seed_data_fieldnames)
+        csv_writer.writeheader()
+        for uac, uac_info in uacs.items():
+            csv_writer.writerow(
+                {
+                    "uac": uac,
+                    "case_id": uac_info.get("case_id"),
+                    "postcode": match_postcode(postcodes, uac_info.get("case_id")),
+                    "instrument_name": instrument_name,
+                    "id": instrument_id,
+                }
+            )
