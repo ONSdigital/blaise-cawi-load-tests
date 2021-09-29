@@ -8,12 +8,6 @@ from locust import HttpUser, task, constant, between, events
 from locust.runners import MasterRunner, WorkerRunner, LocalRunner
 
 load_dotenv()
-# instrument_name = os.getenv("INSTRUMENT_NAME", "dst2106a")
-# instrument_guid = os.getenv("INSTRUMENT_GUID", "da6db4df-f429-4685-b861-e5c9d0f94c70")
-#instrument_name = os.getenv("INSTRUMENT_NAME", "dst2108w")
-#instrument_guid = os.getenv("INSTRUMENT_GUID", "1336fd28-22f0-421e-ab0f-cd7b050e8ccf")
-instrument_name = os.getenv("INSTRUMENT_NAME", "ENV_VAR_NOT_SET")
-instrument_guid = os.getenv("INSTRUMENT_GUID", "ENV_VAR_NOT_SET")
 host_url = os.getenv("HOST_URL", "ENV_VAR_NOT_SET")
 server_park = os.getenv("SERVER_PARK", "gusty")
 
@@ -103,13 +97,13 @@ class CAWI(HttpUser):
 
         self.next()
 
-        self.client.get(f"/{instrument_name}/")
+        self.client.get(f"/{seeded_case['instrument_name']}/")
         self.client.post(
-            f"/{instrument_name}/api/application/start_interview",
+            f"/{seeded_case['instrument_name']}/api/application/start_interview",
             json={
                 "RuntimeParameters": {
                     "ServerPark": f"{server_park}",
-                    "InstrumentId": f"{instrument_guid}",
+                    "InstrumentId": f"{seeded_case['instrument_id']}",
                     "MeasurePageTimes": False,
                     "IsPreview": False,
                     "IsTesting": False,

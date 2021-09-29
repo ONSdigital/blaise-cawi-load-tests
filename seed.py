@@ -7,15 +7,11 @@ from google.auth.transport.requests import Request
 from google.oauth2 import id_token
 
 load_dotenv()
-instrument_name = {
-    "instrument_name": ["DST2101A", "OPN2101A"],
-    "instrument_id": ["1", "2"]
-}
+instrument_names = ["OPN2101A", "OPN2004A"]
 
-#instrument_name = os.getenv("INSTRUMENT_NAME", "ENV_VAR_NOT_SET")
 bus_client_id = os.getenv("BUS_CLIENT_ID", "ENV_VAR_NOT_SET")
 bus_url = os.getenv("BUS_URL", "ENV_VAR_NOT_SET")
-rest_api_url = os.getenv("REST_API_URL", "http://localhost:90")
+rest_api_url = os.getenv("REST_API_URL", "http://localhost:3389")
 server_park = os.getenv("SERVER_PARK", "gusty")
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.split(os.path.abspath(os.path.realpath(sys.argv[0])))[0] + "\key.json"
@@ -52,24 +48,28 @@ def match_postcode(postcodes, case_id):
             return postcode.get("qdatabag.postcode")
     return ""
 
-delete_uacs(bus_url, bus_client_id, instrument_name)
-uacs = generate_uacs(bus_url, bus_client_id, instrument_name)
-postcodes = get_postcodes(rest_api_url, server_park, instrument_name)
+uacs = []
 
+for instrument_name in instrument_names:
+    #delete_uacs(bus_url, bus_client_id, instrument_name)
+    instrument_uacs = generate_uacs(bus_url, bus_client_id, instrument_name)
+    instrument_details = get_instrument_details(rest_api_url, server_park, instrument_name)
+    instrument_postcodes = instrument_details.get("reportingData")
+
+    for uac, uac_info in instrument_uacs.items():
+        uacs.append({
+            "uac": uac,
+            "case_id": uac_info.get("case_id"),
+            "postcode": match_postcode(instrument_postcodes, uac_info.get("case_id")),
+            "instrument_name": instrument_name,
+            "instrument_id": instrument_details.get("instrumentId")
+        })
+
+sorted_uacs = sorted(uacs, key=lambda k: k["uac"])
 
 with open("seed-data.csv", "w", newline="") as seed_data_csv:
-    for instrument_name, instrument_id in instrument_name.items():
-
-        seed_data_fieldnames = ["uac", "postcode", "case_id", "instrument_name", "instrument_id"]
-        csv_writer = csv.DictWriter(seed_data_csv, fieldnames=seed_data_fieldnames)
-        csv_writer.writeheader()
-        for uac, uac_info in uacs.items():
-            csv_writer.writerow(
-                {
-                    "uac": uac,
-                    "case_id": uac_info.get("case_id"),
-                    "postcode": match_postcode(postcodes, uac_info.get("case_id")),
-                    "instrument_name": instrument_name,
-                    "instrument_id": instrument_id,
-                }
-            )
+    seed_data_fieldnames = ["uac", "case_id", "postcode", "instrument_name", "instrument_id"]
+    csv_writer = csv.DictWriter(seed_data_csv, fieldnames=seed_data_fieldnames)
+    csv_writer.writeheader()
+    for uac_detail in sorted_uacs:
+        csv_writer.writerow(uac_detail)
