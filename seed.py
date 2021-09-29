@@ -60,7 +60,7 @@ postcodes = get_postcodes(rest_api_url, server_park, instrument_name)
 with open("seed-data.csv", "w", newline="") as seed_data_csv:
     for instrument_name, instrument_id in instrument_name.items():
 
-        seed_data_fieldnames = ["uac", "postcode", "case_id"]
+        seed_data_fieldnames = ["uac", "postcode", "case_id", "instrument_name", "instrument_id"]
         csv_writer = csv.DictWriter(seed_data_csv, fieldnames=seed_data_fieldnames)
         csv_writer.writeheader()
         for uac, uac_info in uacs.items():
@@ -70,6 +70,6 @@ with open("seed-data.csv", "w", newline="") as seed_data_csv:
                     "case_id": uac_info.get("case_id"),
                     "postcode": match_postcode(postcodes, uac_info.get("case_id")),
                     "instrument_name": instrument_name,
-                    "id": instrument_id,
+                    "instrument_id": instrument_id,
                 }
             )
