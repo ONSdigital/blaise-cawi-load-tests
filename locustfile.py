@@ -5,6 +5,8 @@ from datetime import datetime
 from dotenv import load_dotenv
 from locust import HttpUser, task, constant, events
 from locust.runners import MasterRunner, WorkerRunner, LocalRunner
+from bs4 import BeautifulSoup
+
 
 load_dotenv()
 host_url = os.getenv("HOST_URL", "ENV_VAR_NOT_SET")
@@ -94,9 +96,12 @@ class CAWI(HttpUser):
         self.next()
 
         # cawi portal
-        self.client.get("/auth/login")
+        response = self.client.get("/auth/login")
         time.sleep(3)
-        self.client.post("/auth/login", {"uac": seeded_case["uac"]})
+
+        content = BeautifulSoup(response.content)
+        csrf_token = content.body.find('input', {'name': '_csrf'})['value']
+        self.client.post("/auth/login", {"uac": seeded_case["uac"], "_csrf": csrf_token})
 
         self.client.get(f"/{seeded_case['instrument_name']}/")
         self.client.post(

@@ -2,12 +2,14 @@ import csv
 import os
 import requests
 import sys
+
 from dotenv import load_dotenv
 from google.auth.transport.requests import Request
 from google.oauth2 import id_token
 
+
 load_dotenv()
-instrument_names = ["OPN2101A", "OPN2004A"]
+instrument_names = ["LMS2101_AA1"]
 
 bus_client_id = os.getenv("BUS_CLIENT_ID", "ENV_VAR_NOT_SET")
 bus_url = os.getenv("BUS_URL", "ENV_VAR_NOT_SET")
