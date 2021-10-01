@@ -16,8 +16,8 @@ bus_url = os.getenv("BUS_URL", "ENV_VAR_NOT_SET")
 rest_api_url = os.getenv("REST_API_URL", "http://localhost:3389")
 server_park = os.getenv("SERVER_PARK", "gusty")
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.split(os.path.abspath(os.path.realpath(sys.argv[0])))[0] + "\key.json"
-
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.split(os.path.abspath(os.path.realpath(sys.argv[0])))[
+                                                   0] + "/key.json"
 
 def delete_uacs(bus_url, bus_client_id, instrument_name):
     token = id_token.fetch_id_token(Request(), bus_client_id)
@@ -25,6 +25,7 @@ def delete_uacs(bus_url, bus_client_id, instrument_name):
         f"{bus_url}/uacs/admin/instrument/{instrument_name}",
         headers={"Authorization": f"Bearer {token}"},
     )
+
 
 def generate_uacs(bus_url, bus_client_id, instrument_name):
     token = id_token.fetch_id_token(Request(), bus_client_id)
@@ -42,11 +43,6 @@ def get_instrument_details(rest_api_url, server_park, instrument_name):
             .json()
     )
 
-def match_postcode(postcodes, case_id):
-    for postcode in postcodes:
-        if postcode.get("qid.serial_number") == case_id:
-            return postcode.get("qdatabag.postcode")
-    return ""
 
 uacs = []
 
