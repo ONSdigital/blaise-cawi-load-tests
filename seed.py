@@ -34,13 +34,12 @@ def generate_uacs(bus_url, bus_client_id, instrument_name):
     ).json()
 
 
-def get_postcodes(rest_api_url, server_park, instrument_name):
+def get_instrument_details(rest_api_url, server_park, instrument_name):
     return (
         requests.get(
             f"{rest_api_url}/api/v1/serverparks/{server_park}/instruments/{instrument_name}/report?fieldIds=qid.serial_number"
         )
             .json()
-            .get("reportingData")
     )
 
 def match_postcode(postcodes, case_id):
