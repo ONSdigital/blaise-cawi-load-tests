@@ -1,19 +1,14 @@
 import os
-import random
 import time
 import csv
 from datetime import datetime
 from dotenv import load_dotenv
-from locust import HttpUser, task, constant, between, events
+from locust import HttpUser, task, constant, events
 from locust.runners import MasterRunner, WorkerRunner, LocalRunner
+from bs4 import BeautifulSoup
+
 
 load_dotenv()
-# instrument_name = os.getenv("INSTRUMENT_NAME", "dst2106a")
-# instrument_guid = os.getenv("INSTRUMENT_GUID", "da6db4df-f429-4685-b861-e5c9d0f94c70")
-#instrument_name = os.getenv("INSTRUMENT_NAME", "dst2108w")
-#instrument_guid = os.getenv("INSTRUMENT_GUID", "1336fd28-22f0-421e-ab0f-cd7b050e8ccf")
-instrument_name = os.getenv("INSTRUMENT_NAME", "ENV_VAR_NOT_SET")
-instrument_guid = os.getenv("INSTRUMENT_GUID", "ENV_VAR_NOT_SET")
 host_url = os.getenv("HOST_URL", "ENV_VAR_NOT_SET")
 server_park = os.getenv("SERVER_PARK", "gusty")
 
@@ -78,10 +73,7 @@ def on_test_start(environment, **_kwargs):
 
 class CAWI(HttpUser):
     host = f"{host_url}"
-    #Consistant wait
     wait_time = constant(2)
-    #Random Wait
-    #wait_time = between(1,3)
 
     def next(self):
         global seed_index
@@ -103,13 +95,21 @@ class CAWI(HttpUser):
 
         self.next()
 
-        self.client.get(f"/{instrument_name}/")
+        # cawi portal
+        response = self.client.get("/auth/login")
+        time.sleep(3)
+
+        content = BeautifulSoup(response.content)
+        csrf_token = content.body.find('input', {'name': '_csrf'})['value']
+        self.client.post("/auth/login", {"uac": seeded_case["uac"], "_csrf": csrf_token})
+
+        self.client.get(f"/{seeded_case['instrument_name']}/")
         self.client.post(
-            f"/{instrument_name}/api/application/start_interview",
+            f"/{seeded_case['instrument_name']}/api/application/start_interview",
             json={
                 "RuntimeParameters": {
                     "ServerPark": f"{server_park}",
-                    "InstrumentId": f"{instrument_guid}",
+                    "InstrumentId": f"{seeded_case['instrument_id']}",
                     "MeasurePageTimes": False,
                     "IsPreview": False,
                     "IsTesting": False,
@@ -130,7 +130,7 @@ class CAWI(HttpUser):
                     "Platform": 1,
                     "RecorderAvailable": False,
                     "Referrer": "",
-                    "ReferrerUrl": f"https://{self.host}/auth/login/postcode",
+                    "ReferrerUrl": f"https://{self.host}/auth/login",
                     "ScreenHeight": 790,
                     "ScreenWidth": 1720,
                     "ScrollbarSize": 15,
@@ -142,3 +142,6 @@ class CAWI(HttpUser):
             },
         )
 
+        # cawi portal
+        time.sleep(5)
+        self.client.get("/auth/logout")
