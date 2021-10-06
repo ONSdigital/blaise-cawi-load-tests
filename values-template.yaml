@@ -8,8 +8,7 @@ loadtest:
 
   mount_external_secret:
     mountPath: seed-data
-    files:
-      seed-data: [ seed-data.csv ]
+    files: {}
 
 worker:
   replicas: 6

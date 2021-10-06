@@ -6,21 +6,24 @@ from dotenv import load_dotenv
 from locust import HttpUser, task, constant, events
 from locust.runners import MasterRunner, WorkerRunner, LocalRunner
 from bs4 import BeautifulSoup
-
+import glob
 
 load_dotenv()
 host_url = os.getenv("HOST_URL", "ENV_VAR_NOT_SET")
 server_park = os.getenv("SERVER_PARK", "gusty")
 
-if os.path.isfile("/seed-data/seed-data.csv"):
-    seed_file = "/seed-data/seed-data.csv"
-elif os.path.isfile("/mnt/locust/seed-data.csv"):
-    seed_file = "/mnt/locust/seed-data.csv"
-else:
-    seed_file = "seed-data.csv"
+seed_files = glob.glob("/seed-data/seed-data*.csv")
+if len(seed_files) == 0:
+    seed_files = glob.glob("/mnt/locust/seed-data*.csv")
+if len(seed_files) == 0:
+    seed_files = ["seed-data.csv"]
 
-seed_data_file = open(seed_file)
-seed_data_reader = csv.DictReader(seed_data_file)
+seed_data_readers = []
+
+for seed_file in seed_files:
+    seed_data_file = open(seed_file)
+    seed_data_reader = csv.DictReader(seed_data_file)
+    seed_data_readers.append(seed_data_reader)
 
 csv_data = []
 seed_index = 0
@@ -50,12 +53,13 @@ def on_test_start(environment, **_kwargs):
     # worker nodes to ensure unique data across threads
     if not isinstance(environment.runner, WorkerRunner):
         seed_data = []
-        for row in seed_data_reader:
-            seed_data.append(row)
+        for seed_data_reader in seed_data_readers:
+            for row in seed_data_reader:
+                seed_data.append(row)
     if isinstance(environment.runner, MasterRunner):
         worker_count = environment.runner.worker_count
         chunk_size = int(len(seed_data) / worker_count)
-        
+
         for i, worker in enumerate(environment.runner.clients):
             start_index = i * chunk_size
 
