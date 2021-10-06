@@ -16,6 +16,7 @@ bus_client_id = os.getenv("BUS_CLIENT_ID", "ENV_VAR_NOT_SET")
 bus_url = os.getenv("BUS_URL", "ENV_VAR_NOT_SET")
 rest_api_url = os.getenv("REST_API_URL", "http://localhost:8000")
 server_park = os.getenv("SERVER_PARK", "gusty")
+host_url = os.getenv("HOST_URL", "ENV_VAR_NOT_SET")
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.path.split(os.path.abspath(os.path.realpath(sys.argv[0])))[
                                                    0] + "/key.json"
@@ -68,6 +69,9 @@ split_uacs = chunk_uacs(sorted_uacs, 10000)
 
 with open("values-template.yaml", "r") as values_template:
     helm_values = yaml.load(values_template, Loader=yaml.SafeLoader)
+
+helm_values["master"] = {"environment": {"HOST_URL": host_url, "SERVER_PARK": server_park}}
+helm_values["worker"] = {"environment": {"HOST_URL": host_url, "SERVER_PARK": server_park}}
 
 for index, uac_block in enumerate(split_uacs):
     helm_values["loadtest"]["mount_external_secret"]["files"][f"seed-data{index}"] = [f"seed-data{index}.csv"]
