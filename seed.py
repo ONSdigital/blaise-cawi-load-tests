@@ -10,29 +10,7 @@ from google.oauth2 import id_token
 
 
 load_dotenv()
-instrument_names = [
-    "DST2108W",
-    "LMS2101_AA1",
-    # "LMS2101_AA2",
-    # "LMS2101_AA3",
-    # "LMS2101_AA4",
-    # "LMS2101_AA5",
-    # "LMS2101_BB1",
-    # "LMS2101_BB2",
-    # "LMS2101_BB3",
-    # "LMS2101_BB4",
-    # "LMS2101_BB5",
-    # "LMS2101_CC1",
-    # "LMS2101_CC2",
-    # "LMS2101_CC3",
-    # "LMS2101_CC4",
-    # "LMS2101_CC5",
-    # "LMS2101_DD1",
-    # "LMS2101_DD2",
-    # "LMS2101_DD3",
-    # "LMS2101_DD4",
-    # "LMS2101_DD5",
-]
+insturment_names = os.getenv("INSTRUMENT_NAMES", "").split(",")
 
 bus_client_id = os.getenv("BUS_CLIENT_ID", "ENV_VAR_NOT_SET")
 bus_url = os.getenv("BUS_URL", "ENV_VAR_NOT_SET")
