@@ -10,7 +10,7 @@ from google.oauth2 import id_token
 
 
 load_dotenv()
-insturment_names = os.getenv("INSTRUMENT_NAMES", "").split(",")
+instrument_names = os.getenv("INSTRUMENT_NAMES", "").split(",")
 
 bus_client_id = os.getenv("BUS_CLIENT_ID", "ENV_VAR_NOT_SET")
 bus_url = os.getenv("BUS_URL", "ENV_VAR_NOT_SET")
