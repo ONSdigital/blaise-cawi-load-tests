@@ -5,6 +5,7 @@ loadtest:
   pip_packages:
     - locust-plugins
     - python-dotenv
+    - beautifulsoup4
 
   mount_external_secret:
     mountPath: seed-data
