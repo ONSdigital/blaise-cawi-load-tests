@@ -71,7 +71,7 @@ with open("values-template.yaml", "r") as values_template:
     helm_values = yaml.load(values_template, Loader=yaml.SafeLoader)
 
 helm_values["master"] = {"environment": {"HOST_URL": host_url, "SERVER_PARK": server_park}}
-helm_values["worker"] = {"environment": {"HOST_URL": host_url, "SERVER_PARK": server_park}}
+helm_values["worker"]["environment"] = {"HOST_URL": host_url, "SERVER_PARK": server_park}
 
 for index, uac_block in enumerate(split_uacs):
     helm_values["loadtest"]["mount_external_secret"]["files"][f"seed-data{index}"] = [f"seed-data{index}.csv"]
