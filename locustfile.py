@@ -1,12 +1,12 @@
+import csv
+import glob
 import os
 import time
-import csv
+from bs4 import BeautifulSoup
 from datetime import datetime
 from dotenv import load_dotenv
 from locust import HttpUser, task, constant, events
 from locust.runners import MasterRunner, WorkerRunner, LocalRunner
-from bs4 import BeautifulSoup
-import glob
 
 load_dotenv()
 host_url = os.getenv("HOST_URL", "ENV_VAR_NOT_SET")
@@ -16,7 +16,7 @@ seed_files = glob.glob("/seed-data/seed-data*.csv")
 if len(seed_files) == 0:
     seed_files = glob.glob("/mnt/locust/seed-data*.csv")
 if len(seed_files) == 0:
-    seed_files = ["seed-data.csv"]
+    seed_files = ["seed-data0.csv"]
 
 seed_data_readers = []
 
@@ -28,14 +28,16 @@ for seed_file in seed_files:
 csv_data = []
 seed_index = 0
 
+
 def setup_seed_data(environment, msg, **kwargs):
-    # Fired when the worker recieves a message of type 'setup_seed_data'
+    # Fired when the worker receives a message of type 'setup_seed_data'
     csv_data.extend(msg.data)
-    environment.runner.send_message("acknowledge_seed_data", f"Thanks for the {len(msg.data)} caseId! they are: {msg.data}")
+    environment.runner.send_message("acknowledge_seed_data",
+                                    f"Thanks for the {len(msg.data)} caseId! they are: {msg.data}")
 
 
 def on_acknowledge(msg, **kwargs):
-    # Fired when the master recieves a message of type 'acknowledge_seed_data'
+    # Fired when the master receives a message of type 'acknowledge_seed_data'
     print(msg.data)
 
 
@@ -49,8 +51,7 @@ def on_locust_init(environment, **_kwargs):
 
 @events.test_start.add_listener
 def on_test_start(environment, **_kwargs):
-    # When the test is started, evenly divides list between
-    # worker nodes to ensure unique data across threads
+    # When the test is started, evenly divides list between worker nodes to ensure unique data across threads
     if not isinstance(environment.runner, WorkerRunner):
         seed_data = []
         for seed_data_reader in seed_data_readers:
@@ -73,7 +74,8 @@ def on_test_start(environment, **_kwargs):
     elif isinstance(environment.runner, LocalRunner):
         csv_data.extend(seed_data)
     else:
-        print("Im not in the workers")
+        print("I'm not in the workers")
+
 
 class CAWI(HttpUser):
     host = f"{host_url}"
@@ -93,21 +95,23 @@ class CAWI(HttpUser):
         global seed_index
         seeded_case = csv_data[seed_index]
 
-        print(f"user running open questionnaire task for index: {seed_index}")
+        print(f"User running open questionnaire task for index: {seed_index}")
         print(seeded_case)
         print(datetime.now())
 
         self.next()
 
-        # cawi portal
+        # cawi portal login
         response = self.client.get("/auth/login")
         time.sleep(3)
-
         content = BeautifulSoup(response.content)
         csrf_token = content.body.find('input', {'name': '_csrf'})['value']
         self.client.post("/auth/login", {"uac": seeded_case["uac"], "_csrf": csrf_token})
 
+        # go to blaise instrument
         self.client.get(f"/{seeded_case['instrument_name']}/")
+
+        # start blaise interview
         self.client.post(
             f"/{seeded_case['instrument_name']}/api/application/start_interview",
             json={
@@ -118,7 +122,7 @@ class CAWI(HttpUser):
                     "IsPreview": False,
                     "IsTesting": False,
                     "KeyValue": seeded_case["case_id"],
-                    # "KeyValue": "1001011",
+                    # "KeyValue": "1001011",  # used for testing data deletion, sends all users to the same case
                     "LayoutSet": "CAWI-Web_Large",
                     "Mode": "CAWI",
                 },
@@ -146,6 +150,6 @@ class CAWI(HttpUser):
             },
         )
 
-        # cawi portal
+        # cawi portal logout
         time.sleep(5)
         self.client.get("/auth/logout")

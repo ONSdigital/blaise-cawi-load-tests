@@ -8,7 +8,7 @@ Prerequisites:
 
 Clone the project locally:
 ```shell
-git clone https://github.com/ONSdigital/ ...
+git clone https://github.com/ONSdigital/blaise-cawi-load-tests
 ```
 
 Install Poetry:
@@ -43,30 +43,28 @@ Open a tunnel to our Blaise RESTful API in your GCP project:
 gcloud compute start-iap-tunnel restapi-1 80 --local-host-port=localhost:90 --zone europe-west2-a
 ```
 
-Get service account key:
+Get a service account key:
 ```shell
 gcloud iam service-accounts keys create key.json --iam-account ons-blaise-v2-dev-sandbox123@appspot.gserviceaccount.com
 ```
 
-Create an .env file in the root of the project and add the following environment variables:
+Create a .env file in the root of the project and add the following environment variables:
 
 | Variable | Description | Example |
 | --- | --- | --- |
-| INSTRUMENT_NAME | The name of the questionnaire instrument. | dst2106a |
-| INSTRUMENT_GUID | The globally unique identifier of the questionnaire instrument. | da6db4df-f429-4685-b861-e5c9d0f94c70 |
-| BUS_CLIENT_ID | The bearer token to authenticate with BUS. | blah.apps.googleusercontent.com |
+| INSTRUMENT_NAMES | The names of the questionnaire instruments. | lms2101_aa1, lms2101_aa2, lms2101_aa3 |
+| BUS_CLIENT_ID | The bearer token to authenticate with BUS. Can be found in IAP in the GCP console. | blah.apps.googleusercontent.com |
 | BUS_URL | The URL for BUS. | https://dev-sandbox123-bus.social-surveys.gcp.onsdigital.uk |
-| HOST_URL | The URL for Locust to run load tests on. | https://dev-sandbox123-cati.social-surveys.gcp.onsdigital.uk https://dev-sandbox123-cawi.social-surveys.gcp.onsdigital.uk |
+| HOST_URL | The URL for Locust to run load tests on. | https://dev-sandbox123-cawi.social-surveys.gcp.onsdigital.uk |
 
 ```shell
-INSTRUMENT_NAME="dst2106a"
-INSTRUMENT_GUID="da6db4df-f429-4685-b861-e5c9d0f94c70"
+INSTRUMENT_NAMES="lms2101_aa1, lms2101_aa2, lms2101_aa3"
 BUS_CLIENT_ID="blah.apps.googleusercontent.com"
 BUS_URL="https://dev-sandbox123-bus.social-surveys.gcp.onsdigital.uk"
 HOST_URL="https://dev-sandbox123-cati.social-surveys.gcp.onsdigital.uk"
 ```
 
-Seed data and download to csv file:
+Create seed data and output to csv files:
 ```shell
 poetry run python seed.py
 ```
@@ -102,10 +100,11 @@ http://localhost:8089/
 ### Run via Kubernetes in GCP
 
 Prerequisites:
+- Terraform
 - kubectl
 - helm
 
-Temporarily set an env var with your access token:
+Temporarily set an env var with your GCP access token:
 ```shell
 export GOOGLE_OAUTH_ACCESS_TOKEN=$(gcloud auth print-access-token)
 ```
